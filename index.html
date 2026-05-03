@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BRAIN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#1a1917;--surface:#242220;--surface2:#2c2a27;
+      --border:#343230;--border2:#4a4845;
+      --text:#e8e4db;--text2:#9a9690;--text3:#5e5c58;
+      --accent:#cc785c;--accent-bg:rgba(204,120,92,0.1);--accent-border:rgba(204,120,92,0.25);
+      --green:#5a9e72;--red:#c05050;--r:14px;--rs:9px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;font-size:15px;line-height:1.6;}
+
+    /* SETUP */
+    #setup{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:36px;}
+    .brand{display:flex;flex-direction:column;align-items:center;gap:10px;}
+    .brand svg{color:var(--accent);}
+    .brand-name{font-size:26px;font-weight:400;letter-spacing:.1em;}
+    .brand-sub{font-size:13px;color:var(--text3);letter-spacing:.04em;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:20px;}
+    .card-title{font-size:15px;font-weight:400;}
+    .card-desc{font-size:13px;color:var(--text2);margin-top:4px;}
+    .field{display:flex;flex-direction:column;gap:6px;}
+    .field label{font-size:11px;color:var(--text2);letter-spacing:.05em;text-transform:uppercase;}
+    .field input{background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;outline:none;transition:border-color .15s;}
+    .field input:focus{border-color:var(--border2);}
+    .field-hint{font-size:11px;color:var(--text3);}
+    .btn{border:none;border-radius:var(--rs);padding:11px 20px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:400;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn:disabled{opacity:.35;cursor:not-allowed;}
+    .btn-primary{background:var(--accent);color:#fff;width:100%;}
+    .btn-primary:hover:not(:disabled){opacity:.85;}
+    .btn-ghost{background:none;border:1px solid var(--border);color:var(--text2);padding:9px 16px;font-size:13px;}
+    .btn-ghost:hover{border-color:var(--border2);color:var(--text);}
+
+    /* APP */
+    #app{display:none;flex-direction:column;min-height:100vh;}
+    #app.on{display:flex;}
+    .topbar{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .topbar-brand{display:flex;align-items:center;gap:10px;}
+    .topbar-brand span{font-size:16px;font-weight:400;letter-spacing:.08em;}
+    .topbar-brand svg{color:var(--accent);}
+    .topbar-right{display:flex;gap:8px;align-items:center;}
+    .icon-btn{background:none;border:1px solid var(--border);border-radius:var(--rs);width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--text2);cursor:pointer;transition:all .15s;}
+    .icon-btn:hover{border-color:var(--border2);color:var(--text);}
+    .vault-btn{background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--rs);padding:6px 14px;color:var(--accent);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;}
+    .vault-btn:hover{background:rgba(204,120,92,0.18);}
+
+    .main{flex:1;display:flex;flex-direction:column;align-items:center;padding:48px 24px 60px;gap:28px;max-width:680px;width:100%;margin:0 auto;}
+    .greeting{text-align:center;}
+    .greeting h1{font-size:27px;font-weight:300;margin-bottom:7px;}
+    .greeting p{font-size:14px;color:var(--text3);}
+
+    .input-wrap{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);transition:border-color .15s;}
+    .input-wrap:focus-within{border-color:var(--border2);}
+    #noteInput{width:100%;background:none;border:none;padding:18px 20px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:300;line-height:1.75;resize:none;outline:none;min-height:150px;}
+    #noteInput::placeholder{color:var(--text3);}
+    .input-bar{padding:10px 14px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .char-count{font-size:12px;color:var(--text3);}
+    .save-btn{background:var(--accent);color:#fff;border:none;border-radius:var(--rs);padding:9px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;cursor:pointer;display:flex;align-items:center;gap:7px;transition:opacity .15s;}
+    .save-btn:hover:not(:disabled){opacity:.85;}
+    .save-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+    .section{width:100%;display:flex;flex-direction:column;gap:10px;animation:fadeUp .18s ease;}
+    .section.hidden{display:none!important;}
+    .sec-label{font-size:11px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
+    .pills{display:flex;flex-wrap:wrap;gap:7px;}
+    .pill{background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:6px 16px;font-size:13px;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:300;transition:all .15s;}
+    .pill:hover{border-color:var(--border2);color:var(--text);}
+    .pill.on{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent);}
+
+    .recent-list{display:flex;flex-direction:column;gap:6px;}
+    .r-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .r-info{flex:1;min-width:0;}
+    .r-title{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .r-meta{font-size:11px;color:var(--text3);margin-top:2px;}
+    .r-tag{font-size:11px;color:var(--accent);background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:100px;padding:2px 10px;white-space:nowrap;flex-shrink:0;}
+    .empty-state{font-size:13px;color:var(--text3);padding:6px 0;}
+
+    /* Modals */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:24px;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s;}
+    .overlay.on{opacity:1;pointer-events:all;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);width:100%;max-width:580px;max-height:82vh;display:flex;flex-direction:column;transform:translateY(10px);transition:transform .2s;}
+    .overlay.on .modal{transform:translateY(0);}
+    .modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+    .modal-title{font-size:14px;font-weight:400;}
+    .modal-path{font-size:11px;color:var(--text3);font-family:monospace;margin-top:3px;}
+    .modal-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;}
+    .code-preview{background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:16px;font-family:monospace;font-size:12.5px;color:var(--text2);white-space:pre-wrap;word-break:break-word;line-height:1.8;}
+    .modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;}
+
+    /* Vault modal */
+    .vault-modal{max-width:460px;}
+    .vault-intro{font-size:13px;color:var(--text2);line-height:1.7;}
+    .vault-note{font-size:12px;color:var(--text3);background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;line-height:1.8;}
+    .vault-note code{color:var(--accent);font-family:monospace;}
+    .vault-note strong{color:var(--text2);font-weight:500;}
+    .progress-list{display:flex;flex-direction:column;gap:5px;}
+    .p-item{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--text2);padding:3px 0;}
+    .p-item.done{color:var(--green);}
+    .p-item.fail{color:var(--red);}
+    .p-icon{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+
+    /* Toast */
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(72px);background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:9px 20px;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px;transition:transform .28s cubic-bezier(.34,1.56,.64,1);z-index:200;white-space:nowrap;box-shadow:0 8px 40px rgba(0,0,0,.5);}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+    .toast-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+    .toast.err{border-color:rgba(192,80,80,.35);}
+    .toast.err .toast-dot{background:var(--red);}
+
+    .spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;}
+    .spin-xs{width:11px;height:11px;border:1.5px solid rgba(100,100,100,.4);border-top-color:var(--text3);border-radius:50%;animation:spin .6s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:480px){.main{padding:32px 16px 48px;}.greeting h1{font-size:22px;}}
+  </style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup">
+  <div class="brand">
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <path d="M20 6l2.5 7.5L30 16l-7.5 2.5L20 26l-2.5-7.5L10 16l7.5-2.5L20 6z" fill="currentColor"/>
+      <path d="M32 26l1.2 3.8L37 31l-3.8 1.2L32 36l-1.2-3.8L27 31l3.8-1.2L32 26z" fill="currentColor" opacity=".6"/>
+    </svg>
+    <span class="brand-name">BRAIN</span>
+    <span class="brand-sub">Твоя база знаний</span>
+  </div>
+  <div class="card">
+    <div>
+      <div class="card-title">Подключение к GitHub</div>
+      <div class="card-desc">Данные сохраняются только в браузере</div>
+    </div>
+    <div class="field">
+      <label>GitHub Username</label>
+      <input id="su-user" type="text" placeholder="ataibk" value="ataibk">
+    </div>
+    <div class="field">
+      <label>Репозиторий</label>
+      <input id="su-repo" type="text" placeholder="BRAIN" value="BRAIN">
+    </div>
+    <div class="field">
+      <label>Personal Access Token</label>
+      <input id="su-token" type="password" placeholder="ghp_...">
+      <span class="field-hint">Settings → Developer Settings → Tokens (classic) → repo</span>
+    </div>
+    <button class="btn btn-primary" onclick="saveSetup()">Готово →</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
+        <path d="M20 6l2.5 7.5L30 16l-7.5 2.5L20 26l-2.5-7.5L10 16l7.5-2.5L20 6z" fill="currentColor"/>
+        <path d="M32 26l1.2 3.8L37 31l-3.8 1.2L32 36l-1.2-3.8L27 31l3.8-1.2L32 26z" fill="currentColor" opacity=".55"/>
+      </svg>
+      <span>BRAIN</span>
+    </div>
+    <div class="topbar-right">
+      <button class="vault-btn" onclick="openVaultModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+        Настроить vault
+      </button>
+      <button class="icon-btn" onclick="goSetup()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="greeting">
+      <h1>Что сохраним?</h1>
+      <p>Опиши проблему, решение или идею — разберусь куда положить</p>
+    </div>
+
+    <div class="input-wrap">
+      <textarea id="noteInput"
+        placeholder="Например: В Houdini при рендере через Redshift не подтягивались текстуры. Решение — поставить relative paths в настройках проекта..."
+        oninput="onType()"></textarea>
+      <div class="input-bar">
+        <span class="char-count" id="cc">0 симв.</span>
+        <button class="save-btn" id="saveBtn" onclick="openPreview()" disabled>
+          Сохранить
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="section" id="s-cat">
+      <div class="sec-label">Категория</div>
+      <div class="pills" id="p-cat">
+        <button class="pill on" data-v="auto"  onclick="setCat('auto')">✦ Авто</button>
+        <button class="pill"    data-v="VFX"   onclick="setCat('VFX')">VFX</button>
+        <button class="pill"    data-v="AI"    onclick="setCat('AI')">AI</button>
+        <button class="pill"    data-v="Ideas" onclick="setCat('Ideas')">Идеи</button>
+        <button class="pill"    data-v="Inbox" onclick="setCat('Inbox')">Inbox</button>
+      </div>
+    </div>
+
+    <div class="section hidden" id="s-vfx">
+      <div class="sec-label">Софт</div>
+      <div class="pills" id="p-vfx">
+        <button class="pill" data-v="Nuke"          onclick="setSub('vfx','Nuke')">Nuke</button>
+        <button class="pill" data-v="Houdini"       onclick="setSub('vfx','Houdini')">Houdini</button>
+        <button class="pill" data-v="3ds Max"       onclick="setSub('vfx','3ds Max')">3ds Max</button>
+        <button class="pill" data-v="Vray"          onclick="setSub('vfx','Vray')">V-Ray</button>
+        <button class="pill" data-v="Octane"        onclick="setSub('vfx','Octane')">Octane</button>
+        <button class="pill" data-v="Cinema4D"      onclick="setSub('vfx','Cinema4D')">Cinema 4D</button>
+        <button class="pill" data-v="After Effects" onclick="setSub('vfx','After Effects')">After Effects</button>
+        <button class="pill" data-v="DaVinci"       onclick="setSub('vfx','DaVinci')">DaVinci</button>
+        <button class="pill" data-v="Unreal Engine" onclick="setSub('vfx','Unreal Engine')">Unreal Engine</button>
+      </div>
+    </div>
+
+    <div class="section hidden" id="s-ai">
+      <div class="sec-label">Раздел</div>
+      <div class="pills" id="p-ai">
+        <button class="pill" data-v="Инструменты" onclick="setSub('ai','Инструменты')">Инструменты</button>
+        <button class="pill" data-v="Техники"     onclick="setSub('ai','Техники')">Техники</button>
+        <button class="pill" data-v="Промпты"     onclick="setSub('ai','Промпты')">Промпты</button>
+      </div>
+    </div>
+
+    <div class="section hidden" id="s-ideas">
+      <div class="sec-label">Тип</div>
+      <div class="pills" id="p-ideas">
+        <button class="pill" data-v="Проекты" onclick="setSub('ideas','Проекты')">Проекты</button>
+        <button class="pill" data-v="Мысли"   onclick="setSub('ideas','Мысли')">Мысли</button>
+      </div>
+    </div>
+
+    <div class="section" id="s-recent">
+      <div class="sec-label">Последние заметки</div>
+      <div class="recent-list" id="recentList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Preview modal -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Предпросмотр</div>
+        <div class="modal-path" id="modal-path"></div>
+      </div>
+      <button class="icon-btn" onclick="closeModal('modal')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body"><div class="code-preview" id="modal-content"></div></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal')">Отмена</button>
+      <button class="save-btn" id="confirmBtn" onclick="doSave()">Сохранить в Obsidian</button>
+    </div>
+  </div>
+</div>
+
+<!-- Vault modal -->
+<div class="overlay" id="vaultModal">
+  <div class="modal vault-modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Настройка vault</div>
+        <div class="modal-path">Hub-страницы + CSS тема</div>
+      </div>
+      <button class="icon-btn" id="vaultClose" onclick="closeModal('vaultModal')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="vault-intro" id="vIntro">
+        Создаст главную страницу для каждого раздела и подраздела. Каждая новая заметка будет автоматически ссылаться на свой hub — это и есть граф связей в Obsidian.<br><br>
+        Также добавит CSS файл для оранжевых цветов в frontmatter.
+      </div>
+      <div class="vault-note" id="vNote">
+        После завершения в Obsidian: сделай <strong>Git: Pull</strong>, затем<br>
+        <strong>Settings → Appearance → CSS Snippets</strong> → включи <code>brain-theme</code>
+      </div>
+      <div class="progress-list hidden" id="vProgress"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="vCancel" onclick="closeModal('vaultModal')">Отмена</button>
+      <button class="save-btn" id="vStart" onclick="runVaultSetup()">Создать структуру</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+/* ── State ─────────────────────────────── */
+let cfg={}, recent=[], toastT;
+let st={cat:'auto',vfx:null,ai:null,ideas:null,md:'',path:''};
+const TODAY=new Date().toISOString().slice(0,10);
+
+const SW_MAP={
+  houdini:'Houdini',нюк:'Nuke',nuke:'Nuke',
+  '3ds max':'3ds Max','3dsmax':'3ds Max',
+  vray:'Vray','v-ray':'Vray',octane:'Octane',
+  cinema4d:'Cinema4D','cinema 4d':'Cinema4D',c4d:'Cinema4D',
+  'after effects':'After Effects',ae:'After Effects',
+  davinci:'DaVinci','da vinci':'DaVinci',resolve:'DaVinci',
+  unreal:'Unreal Engine',ue5:'Unreal Engine',ue4:'Unreal Engine',
+};
+const AI_KW  =['ai','gpt','claude','midjourney','stable diffusion','нейро','prompt','промпт','llm','diffusion','comfy'];
+const IDEA_KW=['идея','хочу','думаю','мысль','план','хотел бы','было бы'];
+const FIX_KW =['решил','решение','fix','fixed','помогло','работает','сработало'];
+
+/* ── Hub content ───────────────────────── */
+const HUBS={
+'VFX/VFX.md':`---\ntags: [#hub, #vfx]\ntype: hub\ndate: ${TODAY}\n---\n\n# ⚡ VFX\n\n> [!abstract] О разделе\n> Технические решения, tips & tricks и рабочие заметки по VFX инструментам.\n> Каждая проблема или решение — отдельная заметка со своими тегами и связями.\n\n## Инструменты\n\n- [[Nuke]] — Node-based compositing\n- [[Houdini]] — Процедуральное 3D, симуляции, FX\n- [[3ds Max]] — 3D моделирование и анимация\n- [[Vray]] — Фотореалистичный рендер\n- [[Octane]] — GPU рендер\n- [[Cinema4D]] — Motion graphics, 3D\n- [[After Effects]] — Motion design, compositing\n- [[DaVinci]] — Монтаж, цветокоррекция\n- [[Unreal Engine]] — Real-time 3D, Virtual Production\n\n## Связанные разделы\n\n- [[AI]] — AI инструменты для VFX пайплайна\n- [[Идеи]] — Идеи для проектов\n`,
+'VFX/Nuke/Nuke.md':`---\ntags: [#hub, #vfx, #nuke]\ntype: hub\ndate: ${TODAY}\n---\n\n# 🔴 Nuke\n\n> [!info] О разделе\n> Node-based compositing. Решения, трюки и заметки по работе в Nuke.\n\n## Быстрые ссылки\n\n- [[VFX]] ← Главный VFX раздел\n\n## Частые темы\n\n- Ноды и их настройка\n- Pipeline и Python скрипты\n- Цветокоррекция и OCIO\n- Рендер и экспорт\n\n> [!tip] Совет\n> Используй тег \`#решение\` для быстрого поиска решений конкретных проблем\n`,
+'VFX/Houdini/Houdini.md':`---\ntags: [#hub, #vfx, #houdini]\ntype: hub\ndate: ${TODAY}\n---\n\n# 🟡 Houdini\n\n> [!info] О разделе\n> Процедуральное 3D, симуляции, VFX и всё связанное с Houdini.\n\n## Быстрые ссылки\n\n- [[VFX]] ← Главный VFX раздел\n\n## Частые темы\n\n- VEX и Python скрипты\n- Симуляции (pyro, flip, cloth, RBD)\n- Процедуральное моделирование\n- Mantra / Karma рендер\n- Houdini Engine\n\n> [!tip] Совет\n> Для VEX сниппетов добавляй тег \`#vex\`\n`,
+'VFX/3ds Max/3ds Max.md':`---\ntags: [#hub, #vfx, #3dsmax]\ntype: hub\ndate: ${TODAY}\n---\n\n# 🔵 3ds Max\n\n> [!info] О разделе\n> 3D моделирование, анимация и визуализация в 3ds Max.\n\n## Быстрые ссылки\n\n- [[VFX]] ← Главный VFX раздел\n- [[Vray]] — Рендер в связке с V-Ray\n\n## Частые темы\n\n- Моделирование и модификаторы\n- Материалы и текстуры\n- Риггинг и анимация\n- MAXScript автоматизация\n`,
+'VFX/Vray/Vray.md':`---\ntags: [#hub, #vfx, #vray]\ntype: hub\ndate: ${TODAY}\n---\n\n# ⚪ V-Ray\n\n> [!info] О разделе\n> Настройки рендера, материалы, освещение и оптимизация в V-Ray.\n\n## Быстрые ссылки\n\n- [[VFX]] ← Главный VFX раздел\n- [[3ds Max]] — Основной хост\n\n## Частые темы\n\n- Материалы VRayMtl\n- Освещение и HDRI\n- Настройки качества рендера\n- Postprocessing и LUTs\n`,
+'VFX/Octane/Octane.md':`---\ntags: [#hub, #vfx, #octane]\ntype: hub\ndate: ${TODAY}\n---\n\n# 🟠 Octane\n\n> [!info] О разделе\n> GPU рендер. Материалы, ноды, освещение и оптимизация в Octane.\n\n## Быстрые ссылки\n\n- [[VFX]] ← Главный VFX раздел\n- [[Cinema4D]] — Частый хост\n\n## Частые темы\n\n- Octane материалы и ноды\n- HDRI и освещение\n- Render settings и GPU оптимизация\n`,
+'VFX/Cinema4D/Cinema4D.md':`---\ntags: [#hub, #vfx, #cinema4d]\ntype: hub\ndate: ${TODAY}\n---\n\n# 🔵 Cinema 4D\n\n> [!info] О разделе\n> Motion graphics, 3D анимация и визуализация в Cinema 4D.\n\n## Быстрые ссылки\n\n- [[VFX]] ← Главный VFX раздел\n- [[Octane]] — GPU рендер\n- [[After Effects]] — Финальный композитинг\n\n## Частые темы\n\n- MoGraph инструменты\n- Xpresso и Python\n- Анимация и риггинг\n- Redshift / Octane рендер\n`,
+'VFX/After Effects/After Effects.md':`---\ntags: [#hub, #vfx, #aftereffects]\ntype: hub\ndate: ${TODAY}\n---\n\n# 🔵 After Effects\n\n> [!info] О разделе\n> Motion design, compositing, визуальные эффекты.\n\n## Быстрые ссылки\n\n- [[VFX]] ← Главный VFX раздел\n- [[DaVinci]] — Финальный монтаж\n- [[Nuke]] — Сложный compositing\n\n## Частые темы\n\n- Expressions и скрипты\n- Плагины (Trapcode, VideoCopilot)\n- Keyframing и анимация\n- Рендер и экспорт\n`,
+'VFX/DaVinci/DaVinci.md':`---\ntags: [#hub, #vfx, #davinci]\ntype: hub\ndate: ${TODAY}\n---\n\n# 🟤 DaVinci Resolve\n\n> [!info] О разделе\n> Монтаж, цветокоррекция, Fusion и финальный delivery.\n\n## Быстрые ссылки\n\n- [[VFX]] ← Главный VFX раздел\n- [[After Effects]] — Motion design\n\n## Частые темы\n\n- Color grading и LUTs\n- Fusion (node compositing)\n- Cut и Edit страницы\n- Delivery настройки\n`,
+'VFX/Unreal Engine/Unreal Engine.md':`---\ntags: [#hub, #vfx, #unrealengine]\ntype: hub\ndate: ${TODAY}\n---\n\n# 🟢 Unreal Engine\n\n> [!info] О разделе\n> Real-time 3D, Virtual Production, Sequencer.\n\n## Быстрые ссылки\n\n- [[VFX]] ← Главный VFX раздел\n\n## Частые темы\n\n- Blueprints и C++\n- Материалы и Nanite\n- Lumen освещение\n- Sequencer и кинематика\n- nDisplay и Virtual Production\n`,
+'AI/AI.md':`---\ntags: [#hub, #ai]\ntype: hub\ndate: ${TODAY}\n---\n\n# 🤖 AI\n\n> [!abstract] О разделе\n> Всё что связано с искусственным интеллектом — инструменты, техники, промпты.\n> Особый фокус на применении AI в VFX и творческих задачах.\n\n## Разделы\n\n- [[Инструменты]] — Обзоры и заметки по AI инструментам\n- [[Техники]] — Техники и подходы к работе с AI\n- [[Промпты]] — Библиотека эффективных промптов\n\n## Связанные\n\n- [[VFX]] — AI инструменты для VFX пайплайна\n`,
+'AI/Инструменты/Инструменты.md':`---\ntags: [#hub, #ai, #tools]\ntype: hub\ndate: ${TODAY}\n---\n\n# 🛠 AI Инструменты\n\n> [!info] О разделе\n> Обзоры, заметки и сравнения AI инструментов.\n\n## Быстрые ссылки\n\n- [[AI]] ← Главный AI раздел\n\n## Категории\n\n- **Генерация изображений** — Midjourney, Stable Diffusion, Flux\n- **Генерация видео** — Sora, Kling, Runway\n- **Языковые модели** — Claude, GPT, Gemini\n- **3D и VFX** — AI для пайплайна\n- **Автоматизация** — скрипты и workflow\n`,
+'AI/Техники/Техники.md':`---\ntags: [#hub, #ai, #techniques]\ntype: hub\ndate: ${TODAY}\n---\n\n# ⚙️ AI Техники\n\n> [!info] О разделе\n> Техники и методы эффективной работы с AI.\n\n## Быстрые ссылки\n\n- [[AI]] ← Главный AI раздел\n- [[Промпты]] — Промпт-инжиниринг\n\n## Темы\n\n- Prompt engineering\n- Chain-of-thought\n- Интеграция в пайплайн\n- Автоматизация рутинных задач\n`,
+'AI/Промпты/Промпты.md':`---\ntags: [#hub, #ai, #prompts]\ntype: hub\ndate: ${TODAY}\n---\n\n# 💬 Промпты\n\n> [!info] О разделе\n> Библиотека проверенных промптов для разных задач.\n\n## Быстрые ссылки\n\n- [[AI]] ← Главный AI раздел\n- [[Техники]] — Техники prompt engineering\n\n> [!tip] Формат заметки\n> Инструмент / Задача / Промпт / Результат\n`,
+'Идеи/Идеи.md':`---\ntags: [#hub, #идеи]\ntype: hub\ndate: ${TODAY}\n---\n\n# 💡 Идеи\n\n> [!abstract] О разделе\n> Творческие идеи, планы на проекты и случайные мысли.\n> Лучшая идея — та которую не потерял.\n\n## Разделы\n\n- [[Проекты]] — Конкретные проекты и планы\n- [[Мысли]] — Случайные мысли и вдохновение\n\n## Связанные\n\n- [[VFX]] — Инструменты для реализации\n- [[AI]] — AI возможности для проектов\n`,
+'Идеи/Проекты/Проекты.md':`---\ntags: [#hub, #идеи, #проекты]\ntype: hub\ndate: ${TODAY}\n---\n\n# 🚀 Проекты\n\n> [!info] О разделе\n> Конкретные идеи проектов с планами и этапами.\n\n## Быстрые ссылки\n\n- [[Идеи]] ← Главный раздел\n- [[Мысли]] — Несортированные мысли\n\n> [!tip] Формат\n> Описание → Референсы → Инструменты → Этапы → Дедлайн\n`,
+'Идеи/Мысли/Мысли.md':`---\ntags: [#hub, #идеи, #мысли]\ntype: hub\ndate: ${TODAY}\n---\n\n# 🌊 Мысли\n\n> [!info] О разделе\n> Поток сознания, наблюдения, вдохновение.\n\n## Быстрые ссылки\n\n- [[Идеи]] ← Главный раздел\n- [[Проекты]] — Конкретные проекты\n\n> [!quote]\n> Самые важные идеи приходят в самый неподходящий момент. Лови их здесь.\n`,
+'Inbox/Inbox.md':`---\ntags: [#hub, #inbox]\ntype: hub\ndate: ${TODAY}\n---\n\n# 📥 Inbox\n\n> [!abstract] О разделе\n> Быстрые заметки без чёткой категории.\n> Разбирай периодически и переноси в нужные разделы.\n\n## Связанные\n\n- [[VFX]] — Технические заметки\n- [[AI]] — AI инструменты\n- [[Идеи]] — Идеи и мысли\n\n> [!warning] Правило inbox\n> Если заметка здесь больше недели — время рассортировать\n`,
+'.obsidian/snippets/brain-theme.css':`/* ═══════════════════════════════════
+   BRAIN Theme — Orange Frontmatter
+   Settings → Appearance → CSS Snippets → brain-theme
+═══════════════════════════════════ */
+
+/* Source mode frontmatter */
+.cm-s-obsidian .cm-hmd-frontmatter {
+    color: #cc785c !important;
+}
+.cm-s-obsidian .cm-hmd-frontmatter.cm-string {
+    color: #e0a87c !important;
+}
+
+/* Properties panel — ключи */
+.metadata-property-key .metadata-property-key-input {
+    color: #cc785c !important;
+    font-weight: 500;
+}
+
+/* Properties panel — значения */
+.metadata-property-value input,
+.metadata-property-value .multi-select-pill-content,
+.metadata-property-value .metadata-property-value-inner {
+    color: #d49068 !important;
+}
+
+/* Левый бордер у блока properties */
+.metadata-content-container {
+    border-left: 2px solid rgba(204, 120, 92, 0.25) !important;
+    padding-left: 10px !important;
+}
+
+/* Теги — оранжевые таблетки */
+.metadata-property[data-property-key="tags"] .multi-select-pill {
+    background: rgba(204, 120, 92, 0.12) !important;
+    border: 1px solid rgba(204, 120, 92, 0.3) !important;
+    color: #cc785c !important;
+}
+`,
+};
+
+/* ── Init ──────────────────────────────── */
+function init() {
+  cfg={user:ls('brain_user')||'',repo:ls('brain_repo')||'',token:ls('brain_token')||''};
+  recent=JSON.parse(ls('brain_recent')||'[]');
+  renderRecent();
+  if(cfg.token) showApp(); else showSetup();
+}
+function showSetup(){document.getElementById('setup').style.display='flex';document.getElementById('app').classList.remove('on');}
+function showApp(){document.getElementById('setup').style.display='none';document.getElementById('app').classList.add('on');}
+function goSetup(){
+  document.getElementById('su-user').value=cfg.user;
+  document.getElementById('su-repo').value=cfg.repo;
+  document.getElementById('su-token').value=cfg.token;
+  showSetup();
+}
+function saveSetup(){
+  const u=v('su-user'),r=v('su-repo'),t=v('su-token');
+  if(!u||!r||!t){toast('Заполни все поля','err');return;}
+  setls('brain_user',u);setls('brain_repo',r);setls('brain_token',t);
+  cfg={user:u,repo:r,token:t};
+  showApp();toast('Готово ✓');
+}
+
+/* ── Input ─────────────────────────────── */
+function onType(){
+  const val=v('noteInput');
+  document.getElementById('cc').textContent=val.length+' симв.';
+  document.getElementById('saveBtn').disabled=val.trim().length<5;
+}
+
+/* ── Category ──────────────────────────── */
+function setCat(c){
+  st.cat=c;st.vfx=null;st.ai=null;st.ideas=null;
+  activePill('p-cat',c);
+  toggle('s-vfx',c==='VFX');
+  toggle('s-ai',c==='AI');
+  toggle('s-ideas',c==='Ideas');
+  clearPills('p-vfx');clearPills('p-ai');clearPills('p-ideas');
+}
+function setSub(type,val){
+  if(type==='vfx'){st.vfx=val;activePill('p-vfx',val);}
+  if(type==='ai'){st.ai=val;activePill('p-ai',val);}
+  if(type==='ideas'){st.ideas=val;activePill('p-ideas',val);}
+}
+function activePill(pid,val){document.querySelectorAll(`#${pid} .pill`).forEach(p=>p.classList.toggle('on',p.dataset.v===val));}
+function clearPills(pid){document.querySelectorAll(`#${pid} .pill`).forEach(p=>p.classList.remove('on'));}
+
+/* ── Detect ────────────────────────────── */
+function detectSW(text){
+  const low=text.toLowerCase();
+  for(const[k,v] of Object.entries(SW_MAP)) if(low.includes(k)) return v;
+  return null;
+}
+function detectCat(text){
+  const low=text.toLowerCase();
+  for(const k of Object.keys(SW_MAP)) if(low.includes(k)) return 'VFX';
+  if(AI_KW.some(k=>low.includes(k))) return 'AI';
+  if(IDEA_KW.some(k=>low.includes(k))) return 'Ideas';
+  return 'Inbox';
+}
+
+/* ── Build path (title as filename) ────── */
+function buildPath(title){
+  const clean=title.replace(/[<>:"/\\|?*\[\]]/g,'').trim().slice(0,60);
+  const fname=clean+'.md';
+  const text=v('noteInput');
+  let cat=st.cat==='auto'?detectCat(text):st.cat;
+  if(cat==='VFX'){const sw=st.vfx||detectSW(text);return sw?`VFX/${sw}/${fname}`:`VFX/${fname}`;}
+  if(cat==='AI') return st.ai?`AI/${st.ai}/${fname}`:`AI/${fname}`;
+  if(cat==='Ideas') return st.ideas?`Идеи/${st.ideas}/${fname}`:`Идеи/${fname}`;
+  return `Inbox/${fname}`;
+}
+
+/* ── Build markdown ────────────────────── */
+function buildMd(text){
+  const lines=text.trim().split('\n');
+  const title=lines[0].slice(0,70);
+  const body=lines.slice(1).join('\n').trim();
+  const date=new Date().toISOString().slice(0,10);
+  const low=text.toLowerCase();
+
+  const tags=[];
+  const sw=detectSW(text);
+  if(sw) tags.push(`vfx/${sw.toLowerCase().replace(/\s+/g,'-')}`);
+  if(AI_KW.some(k=>low.includes(k))) tags.push('ai');
+  if(IDEA_KW.some(k=>low.includes(k))) tags.push('идея');
+  if(FIX_KW.some(k=>low.includes(k))) tags.push('решение');
+  if(!tags.length) tags.push('заметка');
+
+  let cat=st.cat==='auto'?detectCat(text):st.cat;
+  let hubLink='';
+  if(cat==='VFX'){const s=st.vfx||sw;hubLink=s?`\n\n## Раздел\n[[${s}]] · [[VFX]]`:'\n\n## Раздел\n[[VFX]]';}
+  else if(cat==='AI') hubLink=st.ai?`\n\n## Раздел\n[[${st.ai}]] · [[AI]]`:'\n\n## Раздел\n[[AI]]';
+  else if(cat==='Ideas') hubLink=st.ideas?`\n\n## Раздел\n[[${st.ideas}]] · [[Идеи]]`:'\n\n## Раздел\n[[Идеи]]';
+  else hubLink='\n\n## Раздел\n[[Inbox]]';
+
+  let md=`---\ntags: [${tags.map(t=>`#${t}`).join(', ')}]\ndate: ${date}\n---\n\n# ${title}\n\n`;
+  if(body){md+=FIX_KW.some(k=>low.includes(k))?`## Решение\n\n${body}\n`:`${body}\n`;}
+  md+=hubLink;
+  md+=`\n\n---\n*${new Date().toLocaleDateString('ru-RU')}*`;
+  return{md,title};
+}
+
+/* ── Preview ───────────────────────────── */
+function openPreview(){
+  const text=v('noteInput').trim();if(!text)return;
+  const{md,title}=buildMd(text);
+  const path=buildPath(title);
+  st.md=md;st.path=path;
+  document.getElementById('modal-content').textContent=md;
+  document.getElementById('modal-path').textContent='📁 '+path;
+  document.getElementById('modal').classList.add('on');
+}
+function closeModal(id){document.getElementById(id).classList.remove('on');}
+
+/* ── Save ──────────────────────────────── */
+async function doSave(){
+  const btn=document.getElementById('confirmBtn');
+  btn.innerHTML='<div class="spin"></div> Сохраняю...';btn.disabled=true;
+  try{
+    await ghPut(st.path,st.md);
+    const title=st.md.match(/# (.+)/)?.[1]||'Заметка';
+    const tag=st.path.split('/')[0];
+    recent.unshift({title,path:st.path,tag,date:new Date().toLocaleDateString('ru-RU')});
+    if(recent.length>8)recent.pop();
+    setls('brain_recent',JSON.stringify(recent));
+    renderRecent();
+    closeModal('modal');
+    document.getElementById('noteInput').value='';
+    document.getElementById('cc').textContent='0 симв.';
+    document.getElementById('saveBtn').disabled=true;
+    setCat('auto');
+    toast('Сохранено в Obsidian ✓');
+  }catch(e){toast(e.message||'Ошибка GitHub API','err');}
+  finally{btn.innerHTML='Сохранить в Obsidian';btn.disabled=false;}
+}
+
+/* ── Vault setup ───────────────────────── */
+function openVaultModal(){document.getElementById('vaultModal').classList.add('on');}
+
+async function runVaultSetup(){
+  const start=document.getElementById('vStart');
+  const cancel=document.getElementById('vCancel');
+  const close=document.getElementById('vaultClose');
+  const intro=document.getElementById('vIntro');
+  const note=document.getElementById('vNote');
+  const progress=document.getElementById('vProgress');
+
+  start.disabled=true;cancel.disabled=true;close.disabled=true;
+  intro.classList.add('hidden');note.classList.add('hidden');
+  progress.classList.remove('hidden');
+  start.innerHTML='<div class="spin"></div>';
+
+  for(const[path,content] of Object.entries(HUBS)){
+    const label=path.split('/').pop().replace('.css',' (CSS тема)');
+    const id='p'+Math.random().toString(36).slice(2);
+    progress.innerHTML+=`<div class="p-item" id="${id}"><div class="p-icon"><div class="spin-xs"></div></div><span>${label}</span></div>`;
+    try{
+      await ghPut(path,content);
+      const el=document.getElementById(id);
+      el.className='p-item done';
+      el.querySelector('.p-icon').innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>';
+    }catch(e){
+      const el=document.getElementById(id);
+      el.className='p-item fail';
+      el.querySelector('.p-icon').innerHTML='✕';
+    }
+  }
+
+  start.innerHTML='Готово';
+  start.disabled=false;cancel.disabled=false;close.disabled=false;
+  note.classList.remove('hidden');
+  note.innerHTML='✓ Создано! В Obsidian: <strong>Git: Pull</strong> → <strong>Settings → Appearance → CSS Snippets</strong> → включи <code>brain-theme</code>';
+}
+
+/* ── GitHub API ────────────────────────── */
+async function ghPut(path,content){
+  const url=`https://api.github.com/repos/${cfg.user}/${cfg.repo}/contents/${path.split('/').map(encodeURIComponent).join('/')}`;
+  const encoded=btoa(unescape(encodeURIComponent(content)));
+  let sha;
+  try{const c=await fetch(url,{headers:{'Authorization':`Bearer ${cfg.token}`}});if(c.ok){const j=await c.json();sha=j.sha;}}catch{}
+  const body={message:`brain: ${path.split('/').pop()}`,content:encoded,branch:'master'};
+  if(sha)body.sha=sha;
+  const res=await fetch(url,{method:'PUT',headers:{'Authorization':`Bearer ${cfg.token}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!res.ok){const e=await res.json().catch(()=>({message:'Network error'}));throw new Error(e.message);}
+}
+
+/* ── Recent ────────────────────────────── */
+function renderRecent(){
+  const el=document.getElementById('recentList');
+  if(!recent.length){el.innerHTML='<div class="empty-state">Пока пусто — сохрани первую заметку</div>';return;}
+  el.innerHTML=recent.map(r=>`<div class="r-item"><div class="r-info"><div class="r-title">${esc(r.title)}</div><div class="r-meta">${r.date} · ${esc(r.path)}</div></div><span class="r-tag">${esc(r.tag)}</span></div>`).join('');
+}
+
+/* ── Toast ─────────────────────────────── */
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  el.className=`toast${type==='err'?' err':''}`;
+  void el.offsetWidth;el.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>el.classList.remove('show'),3200);
+}
+
+/* ── Utils ─────────────────────────────── */
+function ls(k){return localStorage.getItem(k);}
+function setls(k,v){localStorage.setItem(k,v);}
+function v(id){return document.getElementById(id).value.trim();}
+function toggle(id,on){document.getElementById(id).classList.toggle('hidden',!on);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+init();
+</script>
+</body>
+</html>
